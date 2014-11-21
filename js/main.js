@@ -115,7 +115,7 @@ function init()
     */
 
     var loader = new THREE.ColladaLoader();
-    loader.load("media/5.dae", function(object){
+    loader.load("media/4.dae", function(object){
         dae = object.scene;
         
         meshes = [];
@@ -125,8 +125,6 @@ function init()
                 uGeometry = child.geometry;
 
                 meshes[meshes.length] = uGeometry
-
-                console.log("Child")
 
                 gObject = new THREE.PointCloud(uGeometry , material);
                 gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
