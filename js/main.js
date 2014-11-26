@@ -10,6 +10,40 @@ var uGeometry;
 
 var vertices = [];
 
+var objects = [];
+
+var loader;
+
+function loadObject(path, saveTo, onDone)
+{
+    loader.load(path, function(object){
+        dae = object.scene;
+        
+        meshes = [];
+        dae.traverse(function(child){
+            if(child instanceof THREE.Mesh)
+            {
+                uGeometry = child.geometry;
+
+                meshes[meshes.length] = uGeometry
+
+                gObject = new THREE.PointCloud(uGeometry , material);
+                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
+                gObject.position.y = - 5
+                scene.add(gObject)
+
+                for(var i = 0; i < uGeometry.vertices.length; i++)
+                {
+                    vertex = new movingVertex(gObject.geometry.vertices[i], new THREE.Vector3(0.005, -0.001, 0.005), -0.1, 0.0006, fallingVertex)
+                    vertices[vertices.length] = vertex;
+                }
+            }
+
+            gObject.scale.x = gObjct.scale.y = gObject.scale.z = 50;
+        });
+    });
+}
+
 function fallingVertex(movingVert)
 {
     vertAccel = movingVert.getAcceleration();
@@ -71,6 +105,7 @@ function movingVertex(vert, speed, target, acceleration, func)
 //Init function, runs once when the page loads
 function init()
 {
+    loader= new THREE.ColladaLoader();
     container = document.createElement('div');
     document.body.appendChild(container);
  
@@ -114,36 +149,7 @@ function init()
 
     */
 
-    var loader = new THREE.ColladaLoader();
-    loader.load("media/4.dae", function(object){
-        dae = object.scene;
-        
-        meshes = [];
-        dae.traverse(function(child){
-            if(child instanceof THREE.Mesh)
-            {
-                uGeometry = child.geometry;
-
-                meshes[meshes.length] = uGeometry
-
-                gObject = new THREE.PointCloud(uGeometry , material);
-                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
-                gObject.position.y = - 5
-                scene.add(gObject)
-
-                for(var i = 0; i < uGeometry.vertices.length; i++)
-                {
-                    vertex = new movingVertex(gObject.geometry.vertices[i], new THREE.Vector3(0.005, -0.001, 0.005), -0.1, 0.0006, fallingVertex)
-                    vertices[vertices.length] = vertex;
-                }
-            }
-        });
-        
-        
-        
-        dae.scale.x = dae.scale.y = dae.scale.z = 50;
-        dae.updateMatrix();
-    });
+    
 
     //var material = new THREE.MeshLambertMaterial( { ambient: 0xbbbbbb, side: THREE.DoubleSide } );
     var material = new THREE.PointCloudMaterial( {color: 0xff0000, size:0.1 } );
