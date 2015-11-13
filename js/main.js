@@ -4,45 +4,18 @@ var stats;
 var camera;
 var scene;
 var renderer;
-var gObject = null;
+//var gObject = null;
+var gObjects = [];
 
 var uGeometry;
 
 var vertices = [];
+var uVertices = [];
 
 var objects = [];
 
 var loader;
 
-function loadObject(path, saveTo, onDone)
-{
-    loader.load(path, function(object){
-        dae = object.scene;
-        
-        meshes = [];
-        dae.traverse(function(child){
-            if(child instanceof THREE.Mesh)
-            {
-                uGeometry = child.geometry;
-
-                meshes[meshes.length] = uGeometry
-
-                gObject = new THREE.PointCloud(uGeometry , material);
-                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
-                gObject.position.y = - 5
-                scene.add(gObject)
-
-                for(var i = 0; i < uGeometry.vertices.length; i++)
-                {
-                    vertex = new movingVertex(gObject.geometry.vertices[i], new THREE.Vector3(0.005, -0.001, 0.005), -0.1, 0.0006, fallingVertex)
-                    vertices[vertices.length] = vertex;
-                }
-            }
-
-            gObject.scale.x = gObjct.scale.y = gObject.scale.z = 50;
-        });
-    });
-}
 
 function fallingVertex(movingVert)
 {
@@ -102,10 +75,114 @@ function movingVertex(vert, speed, target, acceleration, func)
         }
 }   
 
+function uVertex(vert, pos, target)
+{
+    this.vert = vert;
+    this.target = target;
+    this.pos = pos;
+
+    //this.target = new THREE.Vector3(0,0,0);
+
+    this.update = function(time)
+    {
+        var diff = new THREE.Vector3(0,0,0);
+        //diff = diff.subVectors(this.pos, new THREE.Vector3(0, 1, 0));
+        diff.x = this.pos.x - this.target.x;
+        diff.y = this.pos.y - this.target.y;
+        diff.z = this.pos.z - this.target.z;
+
+        var speed = new THREE.Vector3(diff.x * 0.05, diff.y * 0.05, diff.z * 0.05);
+        //speed.multiplyScalar(time);
+        
+
+        this.pos.x -= speed.x;
+        this.pos.y -= speed.y;
+        this.pos.z -= speed.z;
+
+        this.vert.x = this.pos.x;
+        this.vert.y = this.pos.y;
+        this.vert.z = this.pos.z;
+    };
+}
+
+var pointCloudMaterial;
+
+function loadMesh(filename)
+{
+    var loader = new THREE.ColladaLoader();
+    loader.load(filename, function(object){
+        dae = object.scene;
+        
+        meshes = [];
+        dae.traverse(function(child){
+            if(child instanceof THREE.Mesh)
+            {
+                uGeometry = child.geometry;
+
+                meshes[meshes.length] = uGeometry
+
+
+                var gObject = new THREE.PointCloud(uGeometry , pointCloudMaterial);
+                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
+                gObject.position.y = - 5
+                scene.add(gObject)
+
+                for(var i = 0; i < uGeometry.vertices.length; i++)
+                {
+                    vertex = new movingVertex(gObject.geometry.vertices[i], new THREE.Vector3(0.005, -0.001, 0.005), -0.1, 0.0006, fallingVertex)
+                    vertices[vertices.length] = vertex;
+                }
+
+                gObjects[gObjects.length] = gObject;
+            }
+        });
+        
+        
+        
+        dae.scale.x = dae.scale.y = dae.scale.z = 50;
+        dae.updateMatrix();
+    });
+}
+
+function loadU(filename)
+{
+    var loader = new THREE.ColladaLoader();
+    loader.load(filename, function(object){
+        dae = object.scene;
+        
+        meshes = [];
+        dae.traverse(function(child){
+            if(child instanceof THREE.Mesh)
+            {
+                uGeometry = child.geometry;
+
+                meshes[meshes.length] = uGeometry
+
+                var gObject = new THREE.PointCloud(uGeometry , pointCloudMaterial);
+                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
+                gObject.position.y = - 5
+                scene.add(gObject)
+                
+                for(var i = 0; i < uGeometry.vertices.length; i++)
+                {
+                    vertex = new uVertex(gObject.geometry.vertices[i], vertices[0].getVert(), gObject.geometry.vertices[i]);
+                    uVertices[uVertices.length] = vertex;
+                }
+
+                gObjects[gObjects.length] = gObject;
+            }
+        });
+        
+        dae.scale.x = dae.scale.y = dae.scale.z = 50;
+        dae.updateMatrix();
+    });
+}
+
 //Init function, runs once when the page loads
 function init()
 {
     loader= new THREE.ColladaLoader();
+
     container = document.createElement('div');
     document.body.appendChild(container);
  
@@ -123,36 +200,25 @@ function init()
     scene.add(light);
 
     var manager = new THREE.LoadingManager();
-    
+
+
 
     var onProgress = function ( xhr ) {
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
-            console.log( Math.round(percentComplete, 2) + '% downloaded' );
         }
     };
     var onError = function ( xhr ) {
-        console.log("Error");
     };
 
-    //var objLoader = new THREE.OBJLoader( manager );
-    //objLoader.load('media/u.obj', function( gObject ){
-    /*
-     * objLoader.load('media/male02.obj', function( gObject ){
-            gObject.traverse( function(child){
-                    if(child instanceof THREE.Mesh)
-                    {
-                        uGeometry = child.geometry;
-                    }
-                });
-        }, onProgress, onError);
-
-    */
-
-    
 
     //var material = new THREE.MeshLambertMaterial( { ambient: 0xbbbbbb, side: THREE.DoubleSide } );
-    var material = new THREE.PointCloudMaterial( {color: 0xff0000, size:0.1 } );
+    pointCloudMaterial = new THREE.PointCloudMaterial( {color: 0xff0000, size:0.1 } );
+
+    loadMesh("media/5.dae");
+    setTimeout(function(){loadMesh("media/4.dae")}, 1250);
+    setTimeout(function(){loadMesh("media/3.dae")}, 2500);
+    setTimeout(function(){loadU("media/u.dae")}, 3125);
  
     //gObject = new THREE.Mesh(new THREE.SphereGeometry(75, 75, 75), material);
     //gObject = new THREE.PointCloud(new THREE.SphereGeometry(75, 75, 75), material);
@@ -181,8 +247,15 @@ function render()
     {
         vertices[i].update();
     }
-    if(vertices.length != 0)
+    for(var i = 0; i < uVertices.length; i++)
     {
+        uVertices[i].update(0);
+    }
+    //if(vertices.length != 0)
+    for(var i = 0; i < gObjects.length; i++)
+    {
+        gObject = gObjects[i];
+
         gObject.updateMatrix();
         gObject.geometry.dynamic = true;
         gObject.geometry.__dirtyVertices = true;
