@@ -81,7 +81,7 @@ function uVertex(vert, pos, target)
     this.target = target;
     this.pos = pos;
 
-    //this.target = new THREE.Vector3(0,0,0);
+    //this.target = new THREE.Vector3(0,3,0);
 
     this.update = function(time)
     {
@@ -91,9 +91,10 @@ function uVertex(vert, pos, target)
         diff.y = this.pos.y - this.target.y;
         diff.z = this.pos.z - this.target.z;
 
-        var speed = new THREE.Vector3(diff.x * 0.05, diff.y * 0.05, diff.z * 0.05);
-        //speed.multiplyScalar(time);
+        var speed = new THREE.Vector3(diff.x * 0.5, diff.y * 0.5, diff.z * 0.5);
+        //speed = speed.multiplyScalar(time * 0.06);
         
+        console.log(pos.x);
 
         this.pos.x -= speed.x;
         this.pos.y -= speed.y;
@@ -137,8 +138,6 @@ function loadMesh(filename)
             }
         });
         
-        
-        
         dae.scale.x = dae.scale.y = dae.scale.z = 50;
         dae.updateMatrix();
     });
@@ -165,7 +164,8 @@ function loadU(filename)
                 
                 for(var i = 0; i < uGeometry.vertices.length; i++)
                 {
-                    vertex = new uVertex(gObject.geometry.vertices[i], vertices[0].getVert(), gObject.geometry.vertices[i]);
+                    vertex = new uVertex(gObject.geometry.vertices[i], vertices[Math.floor(vertices.length * Math.random())].getVert(), gObject.geometry.vertices[i]);
+
                     uVertices[uVertices.length] = vertex;
                 }
 
@@ -245,7 +245,7 @@ function render()
     
     for(var i = 0; i < vertices.length; i++)
     {
-        vertices[i].update();
+        //vertices[i].update();
     }
     for(var i = 0; i < uVertices.length; i++)
     {
