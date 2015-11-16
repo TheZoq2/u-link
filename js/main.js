@@ -79,7 +79,11 @@ function uVertex(vert, pos, target)
 {
     this.vert = vert;
     this.target = target;
-    this.pos = pos;
+    this.pos = new THREE.Vector3(0,0,0);
+
+    this.pos.x = pos.x;
+    this.pos.y = pos.y;
+    this.pos.z = pos.z;
 
     //this.target = new THREE.Vector3(0,3,0);
 
@@ -91,10 +95,11 @@ function uVertex(vert, pos, target)
         diff.y = this.pos.y - this.target.y;
         diff.z = this.pos.z - this.target.z;
 
-        var speed = new THREE.Vector3(diff.x * 0.5, diff.y * 0.5, diff.z * 0.5);
+        moveFactor = 1;
+        var speed = new THREE.Vector3(diff.x * moveFactor, diff.y * moveFactor, diff.z * moveFactor);
         //speed = speed.multiplyScalar(time * 0.06);
         
-        console.log(pos.x);
+        //console.log(pos.x);
 
         this.pos.x -= speed.x;
         this.pos.y -= speed.y;
@@ -245,7 +250,7 @@ function render()
     
     for(var i = 0; i < vertices.length; i++)
     {
-        //vertices[i].update();
+        vertices[i].update();
     }
     for(var i = 0; i < uVertices.length; i++)
     {
