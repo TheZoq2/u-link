@@ -78,12 +78,16 @@ function movingVertex(vert, speed, target, acceleration, func)
 function uVertex(vert, pos, target)
 {
     this.vert = vert;
-    this.target = target;
+    this.target = new THREE.Vector3(0,0,0);
     this.pos = new THREE.Vector3(0,0,0);
 
     this.pos.x = pos.x;
     this.pos.y = pos.y;
     this.pos.z = pos.z;
+
+    this.target.x = target.x;
+    this.target.y = target.y;
+    this.target.z = target.z;
 
     //this.target = new THREE.Vector3(0,3,0);
 
@@ -95,15 +99,17 @@ function uVertex(vert, pos, target)
         diff.y = this.pos.y - this.target.y;
         diff.z = this.pos.z - this.target.z;
 
-        moveFactor = 1;
+        moveFactor = 0.05;
         var speed = new THREE.Vector3(diff.x * moveFactor, diff.y * moveFactor, diff.z * moveFactor);
         //speed = speed.multiplyScalar(time * 0.06);
         
         //console.log(pos.x);
+        
+        //console.log(this.pos.x + ",,," + (this.pos.x - speed.x) + "   " + this.target.x + "   " + diff.x);
 
-        this.pos.x -= speed.x;
-        this.pos.y -= speed.y;
-        this.pos.z -= speed.z;
+        this.pos.x = this.pos.x - speed.x;
+        this.pos.y = this.pos.y - speed.y;
+        this.pos.z = this.pos.z - speed.z;
 
         this.vert.x = this.pos.x;
         this.vert.y = this.pos.y;
@@ -129,7 +135,7 @@ function loadMesh(filename)
 
 
                 var gObject = new THREE.PointCloud(uGeometry , pointCloudMaterial);
-                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
+                //gObject.scale.x = gObject.scale.y = gObject.scale.z = 4;
                 gObject.position.y = - 5
                 scene.add(gObject)
 
@@ -163,9 +169,10 @@ function loadU(filename)
                 meshes[meshes.length] = uGeometry
 
                 var gObject = new THREE.PointCloud(uGeometry , pointCloudMaterial);
-                gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
+                //gObject.scale.x = gObject.scale.y = gObject.scale.z = 10;
                 gObject.position.y = - 5
                 scene.add(gObject)
+
                 
                 for(var i = 0; i < uGeometry.vertices.length; i++)
                 {
@@ -192,8 +199,8 @@ function init()
     document.body.appendChild(container);
  
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
-    camera.position.y = 0;
-    camera.position.z = 20;
+    camera.position.y = -4;
+    camera.position.z = 6;
  
     scene = new THREE.Scene();
  
@@ -218,12 +225,14 @@ function init()
 
 
     //var material = new THREE.MeshLambertMaterial( { ambient: 0xbbbbbb, side: THREE.DoubleSide } );
-    pointCloudMaterial = new THREE.PointCloudMaterial( {color: 0xff0000, size:0.1 } );
+    pointCloudMaterial = new THREE.PointCloudMaterial( {color: 0xff0000, size:0.04 } );
+
+    var fallTime = 2000;
 
     loadMesh("media/5.dae");
-    setTimeout(function(){loadMesh("media/4.dae")}, 1250);
-    setTimeout(function(){loadMesh("media/3.dae")}, 2500);
-    setTimeout(function(){loadU("media/u.dae")}, 3125);
+    setTimeout(function(){loadMesh("media/4.dae")}, fallTime);
+    setTimeout(function(){loadMesh("media/3.dae")}, fallTime * 2);
+    setTimeout(function(){loadU("media/u.dae")}, fallTime * 3);
  
     //gObject = new THREE.Mesh(new THREE.SphereGeometry(75, 75, 75), material);
     //gObject = new THREE.PointCloud(new THREE.SphereGeometry(75, 75, 75), material);
